@@ -36,7 +36,8 @@ document.addEventListener('DOMContentLoaded', function() {
             '../ASSETS/IMG/logo.jpeg',
             '../ASSETS/IMG/logo.svg',
             '../ASSETS/IMG/Logo.png',        // Con mayúscula
-            '../ASSETS/IMG/LOGO.png'         // Todo mayúsculas
+            '../ASSETS/IMG/LOGO.png',,
+            "../IMG/logo.png"         // Todo mayúsculas
         ];
         
         let currentPathIndex = 0;
