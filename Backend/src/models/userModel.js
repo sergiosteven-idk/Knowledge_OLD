@@ -1,19 +1,28 @@
-import pool from "../db.js";
+// Backend/src/models/userModel.js
+import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
-export async function crearUsuario(usuario, email, contrasena) {
-  const hashedPass = await bcrypt.hash(contrasena, 10);
-  const [result] = await pool.query(
-    "INSERT INTO usuarios (usuario, email, contrasena) VALUES (?, ?, ?)",
-    [usuario, email, hashedPass]
-  );
-  return result.insertId; // devuelve el ID del nuevo usuario
-}
+const userSchema = new mongoose.Schema(
+  {
+    usuario: { type: String, required: true, trim: true },
+    email: { type: String, required: true, unique: true, lowercase: true },
+    contrasena: { type: String, required: true },
+  },
+  { timestamps: true }
+);
 
-export async function buscarUsuarioPorEmail(email) {
-  const [rows] = await pool.query(
-    "SELECT * FROM usuarios WHERE email = ? LIMIT 1",
-    [email]
-  );
-  return rows[0];
-}
+// Encriptar antes de guardar
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("contrasena")) return next();
+  this.contrasena = await bcrypt.hash(this.contrasena, 10);
+  next();
+});
+
+// Método para validar contraseñas
+userSchema.methods.compararContrasena = async function (password) {
+  return await bcrypt.compare(password, this.contrasena);
+};
+
+const User = mongoose.model("User", userSchema);
+
+export default User;

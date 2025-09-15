@@ -1,17 +1,22 @@
-import mysql from "mysql2/promise";
+// Backend/src/db.js
+import mongoose from "mongoose";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-});
+const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/knowledge";
 
-export default pool;
+const connectDB = async () => {
+  try {
+    await mongoose.connect(MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("✅ Conectado a MongoDB");
+  } catch (err) {
+    console.error("❌ Error conectando a MongoDB:", err.message);
+    process.exit(1);
+  }
+};
+
+export default connectDB;

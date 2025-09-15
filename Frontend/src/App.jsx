@@ -6,6 +6,8 @@ import Footer from "./components/footer";
 import Home from "./pages/home";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
+import Dashboard from "./pages/Dashboard";   // 👈 nueva vista
+import PrivateRoute from "./components/PrivateRoute"; // 👈 ruta protegida
 
 export default function App() {
   return (
@@ -17,6 +19,16 @@ export default function App() {
           <Route path="/" element={<Home />} /> 
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+
+          {/* 🔒 Ruta protegida */}
+          <Route 
+            path="/dashboard" 
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            } 
+          />
         </Routes>
       </main>
 

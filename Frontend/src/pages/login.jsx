@@ -1,26 +1,25 @@
-// src/pages/login.jsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "../assets/CSS/signup_styles.css"; // Usa el mismo CSS
+import "../assets/CSS/signup_styles.css"; 
 import logoImg from "../assets/IMG/logo.png";
+import { login } from "../services/api";
 
 export default function Login() {
   const navigate = useNavigate();
 
-  // estados
-  const [usuario, setUsuario] = useState("");
+  const [email, setEmail] = useState("");
   const [contrasena, setContrasena] = useState("");
   const [verPass, setVerPass] = useState(false);
   const [cargando, setCargando] = useState(false);
-  const [errores, setErrores] = useState({ usuario: "", contrasena: "", general: "" });
+  const [errores, setErrores] = useState({ email: "", contrasena: "", general: "" });
 
-  // validaciones rápidas
+  // validación rápida
   const validar = () => {
     let ok = true;
-    const next = { usuario: "", contrasena: "", general: "" };
+    const next = { email: "", contrasena: "", general: "" };
 
-    if (!/^[a-zA-Z0-9._-]{3,50}$/.test(usuario)) {
-      next.usuario = "Usuario 3-50 caracteres (letras, números, . _ -)";
+    if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
+      next.email = "Correo inválido";
       ok = false;
     }
     if (contrasena.length < 6 || !/[a-zA-Z]/.test(contrasena) || !/[0-9]/.test(contrasena)) {
@@ -39,21 +38,26 @@ export default function Login() {
     setCargando(true);
     setErrores(prev => ({ ...prev, general: "" }));
 
-    // Simulación de login (luego lo conectamos al backend)
-    setTimeout(() => {
+    try {
+      const data = await login(email, contrasena);
+
+      // Guardar token y datos del usuario en localStorage
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("usuario", data.user.usuario);
+      localStorage.setItem("email", data.user.email);
+
+      // Redirigir al dashboard
+      navigate("/dashboard");
+    } catch (err) {
+      setErrores(prev => ({ ...prev, general: err.message }));
+    } finally {
       setCargando(false);
-      if ((usuario === "admin" && contrasena === "123456") || (usuario === "test" && contrasena === "test123")) {
-        navigate("/"); // redirige al home
-      } else {
-        setErrores(prev => ({ ...prev, general: "Usuario o contraseña incorrectos" }));
-      }
-    }, 1200);
+    }
   };
 
   return (
     <div className="signup-container">
       <div className="signup-card">
-        {/* Logo */}
         <div className="logo-section">
           <div className="logo-container">
             {logoImg ? (
@@ -68,49 +72,43 @@ export default function Login() {
           </div>
         </div>
 
-        {/* Encabezado */}
-        <h2>iniciar sesión</h2>
+        <h2>Iniciar sesión</h2>
 
-        {/* Formulario */}
         <form className="signup-form" id="loginForm" onSubmit={onSubmit} noValidate>
-          {/* Error general */}
           {errores.general && (
-            <div
-              className="general-error"
-              style={{
-                background: "rgba(239, 68, 68, 0.1)",
-                color: "#ef4444",
-                padding: "10px 15px",
-                borderRadius: 8,
-                marginBottom: 20,
-                fontSize: 14,
-                textAlign: "center",
-                border: "1px solid rgba(239, 68, 68, 0.3)",
-              }}
-            >
+            <div className="general-error" style={{
+              background: "rgba(239, 68, 68, 0.1)",
+              color: "#ef4444",
+              padding: "10px 15px",
+              borderRadius: 8,
+              marginBottom: 20,
+              fontSize: 14,
+              textAlign: "center",
+              border: "1px solid rgba(239, 68, 68, 0.3)",
+            }}>
               {errores.general}
             </div>
           )}
 
-          {/* Usuario */}
+          {/* Email */}
           <div className="form-group">
-            <label htmlFor="usuario" className="form-label">usuario</label>
+            <label htmlFor="email" className="form-label">Correo</label>
             <input
-              type="text"
-              id="usuario"
-              name="usuario"
+              type="email"
+              id="email"
+              name="email"
               className="form-input"
-              autoComplete="username"
+              autoComplete="email"
               maxLength={50}
-              value={usuario}
-              onChange={(e) => setUsuario(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
-            <span className="error-message">{errores.usuario}</span>
+            <span className="error-message">{errores.email}</span>
           </div>
 
           {/* Contraseña */}
           <div className="form-group">
-            <label htmlFor="contrasena" className="form-label">contraseña</label>
+            <label htmlFor="contrasena" className="form-label">Contraseña</label>
             <div className="password-container">
               <input
                 type={verPass ? "text" : "password"}
@@ -135,16 +133,14 @@ export default function Login() {
             <span className="error-message">{errores.contrasena}</span>
           </div>
 
-          {/* Enlace a registro */}
           <div className="login-section">
             <Link to="/signup" className="login-link">
-              ¿no tienes cuenta? regístrate
+              ¿No tienes cuenta? Regístrate
             </Link>
           </div>
 
-          {/* Botón */}
           <button type="submit" className="signup-btn" disabled={cargando}>
-            {cargando ? "Validando..." : "iniciar sesión"}
+            {cargando ? "Validando..." : "Iniciar sesión"}
           </button>
         </form>
       </div>

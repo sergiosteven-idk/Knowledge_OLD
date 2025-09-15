@@ -1,29 +1,30 @@
+// Backend/src/server.js
 import express from "express";
-import cors from "cors";
 import dotenv from "dotenv";
-import pool from "./db.js";
+import cors from "cors";              // 👈 agregado
+import connectDB from "./db.js";
+import authRoutes from "./routes/auth.js";
 
 dotenv.config();
 
 const app = express();
-app.use(cors());
+
+// ✅ habilitar CORS antes de las rutas
+app.use(cors({
+  origin: "http://localhost:5173",   // URL de tu frontend
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
+
 app.use(express.json());
 
-// Ruta de prueba
-app.get("/", (req, res) => {
-  res.send("✅ Servidor funcionando");
-});
+// Conectar DB
+connectDB();
 
-// Probar conexión a MySQL
-app.get("/db-test", async (req, res) => {
-  try {
-    const [rows] = await pool.query("SELECT NOW() as now");
-    res.json({ success: true, time: rows[0].now });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
+// Rutas
+app.use("/api/auth", authRoutes);
 
-app.listen(process.env.PORT, () => {
-  console.log(`🚀 Servidor en http://localhost:${process.env.PORT}`);
-});
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () =>
+  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`)
+);
