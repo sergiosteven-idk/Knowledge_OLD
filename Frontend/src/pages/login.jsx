@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "../assets/CSS/signup_styles.css"; 
+import "../assets/CSS/signup_styles.css";
 import logoImg from "../assets/IMG/logo.png";
 import { login } from "../services/api";
+import "../components/A11yBar";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -56,93 +57,95 @@ export default function Login() {
   };
 
   return (
-    <div className="signup-container">
-      <div className="signup-card">
-        <div className="logo-section">
-          <div className="logo-container">
-            {logoImg ? (
-              <img src={logoImg} alt="Knowledge Logo" className="logo" id="logo" />
-            ) : (
-              <div className="logo-placeholder" id="logo-placeholder">
-                <div className="logo-circle">
-                  <span className="logo-text">Knowledge</span>
+    <div class=".auth-wrapper">
+      <div className="signup-container">
+        <div className="signup-card">
+          <div className="logo-section">
+            <div className="logo-container">
+              {logoImg ? (
+                <img src={logoImg} alt="Knowledge Logo" className="logo" id="logo" />
+              ) : (
+                <div className="logo-placeholder" id="logo-placeholder">
+                  <div className="logo-circle">
+                    <span className="logo-text">Knowledge</span>
+                  </div>
                 </div>
+              )}
+            </div>
+          </div>
+
+          <h2>Iniciar sesión</h2>
+
+          <form className="signup-form" id="loginForm" onSubmit={onSubmit} noValidate>
+            {errores.general && (
+              <div className="general-error" style={{
+                background: "rgba(239, 68, 68, 0.1)",
+                color: "#ef4444",
+                padding: "10px 15px",
+                borderRadius: 8,
+                marginBottom: 20,
+                fontSize: 14,
+                textAlign: "center",
+                border: "1px solid rgba(239, 68, 68, 0.3)",
+              }}>
+                {errores.general}
               </div>
             )}
-          </div>
-        </div>
 
-        <h2>Iniciar sesión</h2>
-
-        <form className="signup-form" id="loginForm" onSubmit={onSubmit} noValidate>
-          {errores.general && (
-            <div className="general-error" style={{
-              background: "rgba(239, 68, 68, 0.1)",
-              color: "#ef4444",
-              padding: "10px 15px",
-              borderRadius: 8,
-              marginBottom: 20,
-              fontSize: 14,
-              textAlign: "center",
-              border: "1px solid rgba(239, 68, 68, 0.3)",
-            }}>
-              {errores.general}
-            </div>
-          )}
-
-          {/* Email */}
-          <div className="form-group">
-            <label htmlFor="email" className="form-label">Correo</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              className="form-input"
-              autoComplete="email"
-              maxLength={50}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <span className="error-message">{errores.email}</span>
-          </div>
-
-          {/* Contraseña */}
-          <div className="form-group">
-            <label htmlFor="contrasena" className="form-label">Contraseña</label>
-            <div className="password-container">
+            {/* Email */}
+            <div className="form-group">
+              <label htmlFor="email" className="form-label">Correo</label>
               <input
-                type={verPass ? "text" : "password"}
-                id="contrasena"
-                name="contrasena"
+                type="email"
+                id="email"
+                name="email"
                 className="form-input"
-                autoComplete="current-password"
-                minLength={6}
-                maxLength={100}
-                value={contrasena}
-                onChange={(e) => setContrasena(e.target.value)}
+                autoComplete="email"
+                maxLength={50}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
-              <button
-                type="button"
-                className="toggle-password"
-                onClick={() => setVerPass((v) => !v)}
-                aria-label="Mostrar/Ocultar contraseña"
-              >
-                {verPass ? "🙈" : "👁️"}
-              </button>
+              <span className="error-message">{errores.email}</span>
             </div>
-            <span className="error-message">{errores.contrasena}</span>
-          </div>
 
-          <div className="login-section">
-            <Link to="/signup" className="login-link">
-              ¿No tienes cuenta? Regístrate
-            </Link>
-          </div>
+            {/* Contraseña */}
+            <div className="form-group">
+              <label htmlFor="contrasena" className="form-label">Contraseña</label>
+              <div className="password-container">
+                <input
+                  type={verPass ? "text" : "password"}
+                  id="contrasena"
+                  name="contrasena"
+                  className="form-input"
+                  autoComplete="current-password"
+                  minLength={6}
+                  maxLength={100}
+                  value={contrasena}
+                  onChange={(e) => setContrasena(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="toggle-password"
+                  onClick={() => setVerPass((v) => !v)}
+                  aria-label="Mostrar/Ocultar contraseña"
+                >
+                  {verPass ? "🙈" : "👁️"}
+                </button>
+              </div>
+              <span className="error-message">{errores.contrasena}</span>
+            </div>
 
-          <button type="submit" className="signup-btn" disabled={cargando}>
-            {cargando ? "Validando..." : "Iniciar sesión"}
-          </button>
-        </form>
+            <div className="login-section">
+              <Link to="/signup" className="login-link">
+                ¿No tienes cuenta? Regístrate
+              </Link>
+            </div>
+
+            <button type="submit" className="signup-btn" disabled={cargando}>
+              {cargando ? "Validando..." : "Iniciar sesión"}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

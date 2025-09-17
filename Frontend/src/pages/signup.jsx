@@ -2,6 +2,7 @@ import { useState } from "react";
 import "../assets/CSS/signup_styles.css";
 import { register } from "../services/api"; // ⬅️ usamos el servicio real
 import { useNavigate } from "react-router-dom";
+import "../components/A11yBar";
 
 export default function Signup() {
   const [usuario, setUsuario] = useState("");
@@ -56,74 +57,77 @@ export default function Signup() {
   }
 
   return (
-    <div className="signup-container">
-      <div className="signup-card">
-        <h2>Crear cuenta</h2>
-        <form className="signup-form" onSubmit={handleSubmit}>
-          {/* Error general */}
-          {errores.general && (
-            <div
-              className="general-error"
-              style={{
-                background: "rgba(239, 68, 68, 0.1)",
-                color: "#ef4444",
-                padding: "10px 15px",
-                borderRadius: 8,
-                marginBottom: 20,
-                fontSize: 14,
-                textAlign: "center",
-                border: "1px solid rgba(239, 68, 68, 0.3)",
-              }}
-            >
-              {errores.general}
+    <div class=".auth-wrapper">
+      <div className="signup-container">
+        <div className="signup-card">
+          <h2>Crear cuenta</h2>
+          <form className="signup-form" onSubmit={handleSubmit}>
+            {/* Error general */}
+            {errores.general && (
+              <div
+                className="general-error"
+                style={{
+                  background: "rgba(239, 68, 68, 0.1)",
+                  color: "#ef4444",
+                  padding: "10px 15px",
+                  borderRadius: 8,
+                  marginBottom: 20,
+                  fontSize: 14,
+                  textAlign: "center",
+                  border: "1px solid rgba(239, 68, 68, 0.3)",
+                }}
+              >
+                {errores.general}
+              </div>
+
+            )}
+
+            {/* Usuario */}
+            <div className="form-group">
+              <label className="form-label">Usuario</label>
+              <input
+                className="form-input"
+                value={usuario}
+                onChange={(e) => setUsuario(e.target.value)}
+              />
+              <span className="error-message">{errores.usuario}</span>
             </div>
-          )}
 
-          {/* Usuario */}
-          <div className="form-group">
-            <label className="form-label">Usuario</label>
-            <input
-              className="form-input"
-              value={usuario}
-              onChange={(e) => setUsuario(e.target.value)}
-            />
-            <span className="error-message">{errores.usuario}</span>
+            {/* Correo */}
+            <div className="form-group">
+              <label className="form-label">Correo</label>
+              <input
+                type="email"
+                className="form-input"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <span className="error-message">{errores.email}</span>
+            </div>
+
+            {/* Contraseña */}
+            <div className="form-group">
+              <label className="form-label">Contraseña</label>
+              <input
+                type="password"
+                className="form-input"
+                value={contrasena}
+                onChange={(e) => setContrasena(e.target.value)}
+              />
+              <span className="error-message">{errores.contrasena}</span>
+            </div>
+
+            {/* Botón */}
+            <button className="signup-btn" type="submit" disabled={cargando}>
+              {cargando ? "Registrando..." : "Registrarse"}
+            </button>
+          </form>
+
+          {mensaje && <p className="signup-message">{mensaje}</p>}
+
+          <div className="login-section">
+            <a href="/login" className="login-link">¿Ya tienes cuenta? Inicia sesión</a>
           </div>
-
-          {/* Correo */}
-          <div className="form-group">
-            <label className="form-label">Correo</label>
-            <input
-              type="email"
-              className="form-input"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <span className="error-message">{errores.email}</span>
-          </div>
-
-          {/* Contraseña */}
-          <div className="form-group">
-            <label className="form-label">Contraseña</label>
-            <input
-              type="password"
-              className="form-input"
-              value={contrasena}
-              onChange={(e) => setContrasena(e.target.value)}
-            />
-            <span className="error-message">{errores.contrasena}</span>
-          </div>
-
-          {/* Botón */}
-          <button className="signup-btn" type="submit" disabled={cargando}>
-            {cargando ? "Registrando..." : "Registrarse"}
-          </button>
-        </form>
-
-        {mensaje && <p className="signup-message">{mensaje}</p>}
-
-        <div className="login-section">
-          <a href="/login" className="login-link">¿Ya tienes cuenta? Inicia sesión</a>
         </div>
       </div>
     </div>
