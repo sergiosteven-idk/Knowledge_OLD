@@ -1,0 +1,131 @@
+/* 🎨 Estilos generales */
+.contact-container {
+  font-family: 'Segoe UI', sans-serif;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* 🏠 Hero */
+.contact-container .hero {
+  text-align: center;
+  padding: 70px 20px;
+  background: linear-gradient(135deg, #6b46c1, #805ad5, #9f7aea);
+  color: #fff;
+  border-radius: 0 0 40px 40px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+.contact-container .hero h1 {
+  font-size: 2.8rem;
+  margin-bottom: 15px;
+}
+
+.contact-container .hero p {
+  max-width: 700px;
+  margin: 0 auto;
+  font-size: 1.2rem;
+}
+
+/* 📋 Formulario */
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 30px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.contact-form label {
+  font-weight: 600;
+  color: #4a148c;
+}
+
+.contact-form input,
+.contact-form textarea {
+  padding: 14px 16px;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.3s, box-shadow 0.3s;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+  border-color: #6b46c1;
+  box-shadow: 0 0 0 3px rgba(107,70,193,0.2);
+}
+
+.contact-form textarea {
+  resize: vertical;
+}
+
+/* 🔘 Botón */
+.send-btn {
+  background: #6b46c1;
+  color: #fff;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.send-btn:hover {
+  background: #805ad5;
+  transform: translateY(-2px);
+}
+
+.send-btn:active {
+  transform: translateY(0);
+}
+
+/* 📞 Otros medios */
+.section ul {
+  list-style: none;
+  padding: 0;
+  max-width: 600px;
+  margin: 20px auto;
+  text-align: left;
+}
+
+.section ul li {
+  background: #f9f9ff;
+  margin: 10px 0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  font-size: 1rem;
+}
+
+.section ul li a {
+  color: #6b46c1;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.section ul li a:hover {
+  text-decoration: underline;
+}
+
+/* 📱 Responsive */
+@media (max-width: 600px) {
+  .contact-container .hero h1 {
+    font-size: 2rem;
+  }
+
+  .contact-container .hero p {
+    font-size: 1rem;
+  }
+
+  .contact-form {
+    padding: 20px;
+  }
+}

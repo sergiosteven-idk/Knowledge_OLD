@@ -8,7 +8,7 @@ export default function Navbar() {
 
   return (
     <nav className="navbar" role="navigation" aria-label="Menú principal">
-      {/* Izquierda */}
+      {/* Izquierda: Logo */}
       <div className="nav-left">
         <div className="logo-container">
           <Link to="/" aria-label="Ir a inicio">
@@ -44,7 +44,7 @@ export default function Navbar() {
           CONTACTO
         </Link>
 
-        {/* Opciones móviles: login/register dentro del menú */}
+        {/* Opciones móviles */}
         <div className="nav-right mobile-only">
           <Link to="/login" className="user-btn" onClick={() => setMenuOpen(false)}>
             Iniciar Sesión
@@ -68,7 +68,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Derecha: Botones */}
+      {/* Derecha: Botones (versión escritorio) */}
       <div className="nav-right desktop-only">
         <Link to="/login" className="user-btn">
           Iniciar Sesión
@@ -78,15 +78,15 @@ export default function Navbar() {
         </Link>
       </div>
 
-      {/* Hamburger */}
-      <div
+      {/* Botón Hamburguesa */}
+      <button
         className={`hamburger ${menuOpen ? "active" : ""}`}
         onClick={() => setMenuOpen(!menuOpen)}
         aria-label="Abrir o cerrar menú"
         aria-expanded={menuOpen}
       >
         ☰
-      </div>
+      </button>
     </nav>
   );
 }

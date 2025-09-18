@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../assets/CSS/signup_styles.css";
 import logoImg from "../assets/IMG/logo.png";
-import { login } from "../services/api";
-import "../components/A11yBar";
+import { loginUser } from "../services/authService";
+import A11yBar from "../components/A11yBar";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -12,19 +12,27 @@ export default function Login() {
   const [contrasena, setContrasena] = useState("");
   const [verPass, setVerPass] = useState(false);
   const [cargando, setCargando] = useState(false);
-  const [errores, setErrores] = useState({ email: "", contrasena: "", general: "" });
+  const [errores, setErrores] = useState({
+    email: "",
+    contrasena: "",
+    general: "",
+  });
 
-  // validación rápida
+  // ✅ Validación básica antes de enviar
   const validar = () => {
     let ok = true;
     const next = { email: "", contrasena: "", general: "" };
 
     if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
-      next.email = "Correo inválido";
+      next.email = "El correo no tiene un formato válido";
       ok = false;
     }
-    if (contrasena.length < 6 || !/[a-zA-Z]/.test(contrasena) || !/[0-9]/.test(contrasena)) {
-      next.contrasena = "Mínimo 6 caracteres con letras y números";
+    if (
+      contrasena.length < 6 ||
+      !/[a-zA-Z]/.test(contrasena) ||
+      !/[0-9]/.test(contrasena)
+    ) {
+      next.contrasena = "Debe tener al menos 6 caracteres, con letras y números";
       ok = false;
     }
 
@@ -32,69 +40,79 @@ export default function Login() {
     return ok;
   };
 
+  // ✅ Enviar al backend
   const onSubmit = async (e) => {
     e.preventDefault();
     if (!validar()) return;
 
     setCargando(true);
-    setErrores(prev => ({ ...prev, general: "" }));
+    setErrores({ email: "", contrasena: "", general: "" });
 
     try {
-      const data = await login(email, contrasena);
+      // 👇 importante: tu backend espera "email" y "contrasena"
+      const data = await loginUser({ email, contrasena });
 
-      // Guardar token y datos del usuario en localStorage
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("usuario", data.user.usuario);
-      localStorage.setItem("email", data.user.email);
+      if (data.token) {
+        // Guardar en localStorage
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("usuario", data.user?.usuario || "");
+        localStorage.setItem("email", data.user?.email || email);
 
-      // Redirigir al dashboard
-      navigate("/dashboard");
+        // Redirigir a la zona privada
+        navigate("/dashboard");
+      } else {
+        setErrores((prev) => ({
+          ...prev,
+          general: data.message || "Credenciales incorrectas",
+        }));
+      }
     } catch (err) {
-      setErrores(prev => ({ ...prev, general: err.message }));
+      setErrores((prev) => ({
+        ...prev,
+        general: err.message || "No se pudo conectar al servidor",
+      }));
     } finally {
       setCargando(false);
     }
   };
 
   return (
-    <div class=".auth-wrapper">
+    <div className="auth-wrapper">
+      <A11yBar />
+
       <div className="signup-container">
         <div className="signup-card">
+          {/* Logo */}
           <div className="logo-section">
             <div className="logo-container">
-              {logoImg ? (
-                <img src={logoImg} alt="Knowledge Logo" className="logo" id="logo" />
-              ) : (
-                <div className="logo-placeholder" id="logo-placeholder">
-                  <div className="logo-circle">
-                    <span className="logo-text">Knowledge</span>
-                  </div>
-                </div>
-              )}
+              <img src={logoImg} alt="Logo Knowledge" className="logo" />
             </div>
           </div>
 
           <h2>Iniciar sesión</h2>
 
-          <form className="signup-form" id="loginForm" onSubmit={onSubmit} noValidate>
+          <form
+            className="signup-form"
+            onSubmit={onSubmit}
+            noValidate
+            aria-label="Formulario de inicio de sesión"
+          >
+            {/* Mensaje de error general */}
             {errores.general && (
-              <div className="general-error" style={{
-                background: "rgba(239, 68, 68, 0.1)",
-                color: "#ef4444",
-                padding: "10px 15px",
-                borderRadius: 8,
-                marginBottom: 20,
-                fontSize: 14,
-                textAlign: "center",
-                border: "1px solid rgba(239, 68, 68, 0.3)",
-              }}>
+              <div
+                className="general-error"
+                role="alert"
+                aria-live="assertive"
+              >
                 {errores.general}
               </div>
             )}
 
             {/* Email */}
             <div className="form-group">
-              <label htmlFor="email" className="form-label">Correo</label>
+              <label htmlFor="email" className="form-label">
+                Correo electrónico
+              </label>
               <input
                 type="email"
                 id="email"
@@ -104,13 +122,20 @@ export default function Login() {
                 maxLength={50}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
+                aria-invalid={!!errores.email}
+                aria-describedby="email-error"
               />
-              <span className="error-message">{errores.email}</span>
+              <span id="email-error" className="error-message">
+                {errores.email}
+              </span>
             </div>
 
             {/* Contraseña */}
             <div className="form-group">
-              <label htmlFor="contrasena" className="form-label">Contraseña</label>
+              <label htmlFor="contrasena" className="form-label">
+                Contraseña
+              </label>
               <div className="password-container">
                 <input
                   type={verPass ? "text" : "password"}
@@ -122,26 +147,37 @@ export default function Login() {
                   maxLength={100}
                   value={contrasena}
                   onChange={(e) => setContrasena(e.target.value)}
+                  required
+                  aria-invalid={!!errores.contrasena}
+                  aria-describedby="password-error"
                 />
                 <button
                   type="button"
                   className="toggle-password"
                   onClick={() => setVerPass((v) => !v)}
-                  aria-label="Mostrar/Ocultar contraseña"
+                  aria-label={verPass ? "Ocultar contraseña" : "Mostrar contraseña"}
                 >
                   {verPass ? "🙈" : "👁️"}
                 </button>
               </div>
-              <span className="error-message">{errores.contrasena}</span>
+              <span id="password-error" className="error-message">
+                {errores.contrasena}
+              </span>
             </div>
 
+            {/* Link a registro */}
             <div className="login-section">
               <Link to="/signup" className="login-link">
                 ¿No tienes cuenta? Regístrate
               </Link>
             </div>
 
-            <button type="submit" className="signup-btn" disabled={cargando}>
+            <button
+              type="submit"
+              className="signup-btn"
+              disabled={cargando}
+              aria-busy={cargando}
+            >
               {cargando ? "Validando..." : "Iniciar sesión"}
             </button>
           </form>

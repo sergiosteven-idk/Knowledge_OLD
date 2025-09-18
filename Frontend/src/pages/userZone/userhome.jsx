@@ -1,5 +1,7 @@
-// src/pages/Dashboard.jsx
-import { useNavigate } from "react-router-dom";
+// src/pages/userhome.jsx
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import A11yBar from "../../components/A11yBar";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -13,8 +15,9 @@ export default function Dashboard() {
 
   return (
     <div style={{ padding: "20px" }}>
-      <h1>Bienvenido 🚀</h1>
+      <h1>Bienvenido</h1>
       {usuario && <p>Usuario: {usuario}</p>}
+      <A11yBar />
 
       <button 
         onClick={logout} 

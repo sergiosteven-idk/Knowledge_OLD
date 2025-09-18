@@ -1,65 +1,54 @@
-import User from "../models/userModel.js";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+import { createUser, findUserByEmail } from "../models/sql/UserModel.js";
 
 // Registro
-export async function register(req, res) {
+export const register = async (req, res) => {
   try {
-    const { usuario, email, contrasena } = req.body;
+    const { nombre, apellido, correo, contrasena, tipo_usuario } = req.body;
 
-    const existe = await User.findOne({ email });
-    if (existe) {
+    // Validar campos
+    if (!nombre || !apellido || !correo || !contrasena) {
+      return res.status(400).json({ message: "Todos los campos son obligatorios" });
+    }
+
+    // Verificar duplicado
+    const existingUser = await findUserByEmail(correo);
+    if (existingUser) {
       return res.status(400).json({ message: "El correo ya está registrado" });
     }
 
-    const nuevoUsuario = new User({ usuario, email, contrasena });
-    await nuevoUsuario.save();
+    // Crear usuario
+    const newUserId = await createUser({ nombre, apellido, correo, contrasena, tipo_usuario });
 
-    res.status(201).json({
-      message: "Usuario creado correctamente",
-      user: {
-        id: nuevoUsuario._id,
-        usuario: nuevoUsuario.usuario,
-        email: nuevoUsuario.email,
-      },
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error en el servidor" });
+    res.status(201).json({ message: "Usuario creado con éxito", userId: newUserId });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error en el registro" });
   }
-}
+};
 
 // Login
-export async function login(req, res) {
+export const login = async (req, res) => {
   try {
-    const { email, contrasena } = req.body;
+    const { correo, contrasena } = req.body;
 
-    const usuario = await User.findOne({ email });
-    if (!usuario) {
-      return res.status(400).json({ message: "Usuario no encontrado" });
-    }
+    const user = await findUserByEmail(correo);
+    if (!user) return res.status(400).json({ message: "Usuario no encontrado" });
 
-    const valido = await usuario.compararContrasena(contrasena);
-    if (!valido) {
-      return res.status(400).json({ message: "Contraseña incorrecta" });
-    }
+    const isMatch = await bcrypt.compare(contrasena, user.contrasena);
+    if (!isMatch) return res.status(401).json({ message: "Contraseña incorrecta" });
 
+    // Generar token JWT
     const token = jwt.sign(
-      { id: usuario._id, email: usuario.email },
-      process.env.JWT_SECRET || "secreto",
+      { id: user.id_usuario, correo: user.correo, rol: user.tipo_usuario },
+      process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
-    res.json({
-      message: "Login exitoso",
-      token,
-      user: {
-        id: usuario._id,
-        usuario: usuario.usuario,
-        email: usuario.email,
-      },
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error en el servidor" });
+    res.json({ message: "Login exitoso", token, user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error en el login" });
   }
-}
+};
