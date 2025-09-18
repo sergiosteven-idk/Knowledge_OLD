@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000/api/auth"; // backend
+const API_URL = "http://localhost:5173/api/auth"; // backend
 
 // Registro de usuario
 export const registerUser = async ({ usuario, email, contrasena }) => {
