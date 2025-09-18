@@ -1,30 +1,38 @@
-// src/pages/login.jsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "../assets/CSS/signup_styles.css"; // Usa el mismo CSS
+import "../assets/CSS/signup_styles.css";
 import logoImg from "../assets/IMG/logo.png";
+import { loginUser } from "../services/authService";
+import A11yBar from "../components/A11yBar";
 
 export default function Login() {
   const navigate = useNavigate();
 
-  // estados
-  const [usuario, setUsuario] = useState("");
+  const [email, setEmail] = useState("");
   const [contrasena, setContrasena] = useState("");
   const [verPass, setVerPass] = useState(false);
   const [cargando, setCargando] = useState(false);
-  const [errores, setErrores] = useState({ usuario: "", contrasena: "", general: "" });
+  const [errores, setErrores] = useState({
+    email: "",
+    contrasena: "",
+    general: "",
+  });
 
-  // validaciones rápidas
+  // ✅ Validación básica antes de enviar
   const validar = () => {
     let ok = true;
-    const next = { usuario: "", contrasena: "", general: "" };
+    const next = { email: "", contrasena: "", general: "" };
 
-    if (!/^[a-zA-Z0-9._-]{3,50}$/.test(usuario)) {
-      next.usuario = "Usuario 3-50 caracteres (letras, números, . _ -)";
+    if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
+      next.email = "El correo no tiene un formato válido";
       ok = false;
     }
-    if (contrasena.length < 6 || !/[a-zA-Z]/.test(contrasena) || !/[0-9]/.test(contrasena)) {
-      next.contrasena = "Mínimo 6 caracteres con letras y números";
+    if (
+      contrasena.length < 6 ||
+      !/[a-zA-Z]/.test(contrasena) ||
+      !/[0-9]/.test(contrasena)
+    ) {
+      next.contrasena = "Debe tener al menos 6 caracteres, con letras y números";
       ok = false;
     }
 
@@ -32,121 +40,148 @@ export default function Login() {
     return ok;
   };
 
+  // ✅ Enviar al backend
   const onSubmit = async (e) => {
     e.preventDefault();
     if (!validar()) return;
 
     setCargando(true);
-    setErrores(prev => ({ ...prev, general: "" }));
+    setErrores({ email: "", contrasena: "", general: "" });
 
-    // Simulación de login (luego lo conectamos al backend)
-    setTimeout(() => {
-      setCargando(false);
-      if ((usuario === "admin" && contrasena === "123456") || (usuario === "test" && contrasena === "test123")) {
-        navigate("/"); // redirige al home
+    try {
+      // 👇 importante: tu backend espera "email" y "contrasena"
+      const data = await loginUser({ email, contrasena });
+
+      if (data.token) {
+        // Guardar en localStorage
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("usuario", data.user?.usuario || "");
+        localStorage.setItem("email", data.user?.email || email);
+
+        // Redirigir a la zona privada
+        navigate("/dashboard");
       } else {
-        setErrores(prev => ({ ...prev, general: "Usuario o contraseña incorrectos" }));
+        setErrores((prev) => ({
+          ...prev,
+          general: data.message || "Credenciales incorrectas",
+        }));
       }
-    }, 1200);
+    } catch (err) {
+      setErrores((prev) => ({
+        ...prev,
+        general: err.message || "No se pudo conectar al servidor",
+      }));
+    } finally {
+      setCargando(false);
+    }
   };
 
   return (
-    <div className="signup-container">
-      <div className="signup-card">
-        {/* Logo */}
-        <div className="logo-section">
-          <div className="logo-container">
-            {logoImg ? (
-              <img src={logoImg} alt="Knowledge Logo" className="logo" id="logo" />
-            ) : (
-              <div className="logo-placeholder" id="logo-placeholder">
-                <div className="logo-circle">
-                  <span className="logo-text">Knowledge</span>
-                </div>
+    <div className="auth-wrapper">
+      <A11yBar />
+
+      <div className="signup-container">
+        <div className="signup-card">
+          {/* Logo */}
+          <div className="logo-section">
+            <div className="logo-container">
+              <img src={logoImg} alt="Logo Knowledge" className="logo" />
+            </div>
+          </div>
+
+          <h2>Iniciar sesión</h2>
+
+          <form
+            className="signup-form"
+            onSubmit={onSubmit}
+            noValidate
+            aria-label="Formulario de inicio de sesión"
+          >
+            {/* Mensaje de error general */}
+            {errores.general && (
+              <div
+                className="general-error"
+                role="alert"
+                aria-live="assertive"
+              >
+                {errores.general}
               </div>
             )}
-          </div>
-        </div>
 
-        {/* Encabezado */}
-        <h2>iniciar sesión</h2>
-
-        {/* Formulario */}
-        <form className="signup-form" id="loginForm" onSubmit={onSubmit} noValidate>
-          {/* Error general */}
-          {errores.general && (
-            <div
-              className="general-error"
-              style={{
-                background: "rgba(239, 68, 68, 0.1)",
-                color: "#ef4444",
-                padding: "10px 15px",
-                borderRadius: 8,
-                marginBottom: 20,
-                fontSize: 14,
-                textAlign: "center",
-                border: "1px solid rgba(239, 68, 68, 0.3)",
-              }}
-            >
-              {errores.general}
-            </div>
-          )}
-
-          {/* Usuario */}
-          <div className="form-group">
-            <label htmlFor="usuario" className="form-label">usuario</label>
-            <input
-              type="text"
-              id="usuario"
-              name="usuario"
-              className="form-input"
-              autoComplete="username"
-              maxLength={50}
-              value={usuario}
-              onChange={(e) => setUsuario(e.target.value)}
-            />
-            <span className="error-message">{errores.usuario}</span>
-          </div>
-
-          {/* Contraseña */}
-          <div className="form-group">
-            <label htmlFor="contrasena" className="form-label">contraseña</label>
-            <div className="password-container">
+            {/* Email */}
+            <div className="form-group">
+              <label htmlFor="email" className="form-label">
+                Correo electrónico
+              </label>
               <input
-                type={verPass ? "text" : "password"}
-                id="contrasena"
-                name="contrasena"
+                type="email"
+                id="email"
+                name="email"
                 className="form-input"
-                autoComplete="current-password"
-                minLength={6}
-                maxLength={100}
-                value={contrasena}
-                onChange={(e) => setContrasena(e.target.value)}
+                autoComplete="email"
+                maxLength={50}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                aria-invalid={!!errores.email}
+                aria-describedby="email-error"
               />
-              <button
-                type="button"
-                className="toggle-password"
-                onClick={() => setVerPass((v) => !v)}
-                aria-label="Mostrar/Ocultar contraseña"
-              >
-                {verPass ? "🙈" : "👁️"}
-              </button>
+              <span id="email-error" className="error-message">
+                {errores.email}
+              </span>
             </div>
-            <span className="error-message">{errores.contrasena}</span>
-          </div>
 
-          {/* Enlace a registro */}
-          <div className="login-section">
-            <Link to="/signup" className="login-link">
-              ¿no tienes cuenta? regístrate
-            </Link>
-          </div>
+            {/* Contraseña */}
+            <div className="form-group">
+              <label htmlFor="contrasena" className="form-label">
+                Contraseña
+              </label>
+              <div className="password-container">
+                <input
+                  type={verPass ? "text" : "password"}
+                  id="contrasena"
+                  name="contrasena"
+                  className="form-input"
+                  autoComplete="current-password"
+                  minLength={6}
+                  maxLength={100}
+                  value={contrasena}
+                  onChange={(e) => setContrasena(e.target.value)}
+                  required
+                  aria-invalid={!!errores.contrasena}
+                  aria-describedby="password-error"
+                />
+                <button
+                  type="button"
+                  className="toggle-password"
+                  onClick={() => setVerPass((v) => !v)}
+                  aria-label={verPass ? "Ocultar contraseña" : "Mostrar contraseña"}
+                >
+                  {verPass ? "🙈" : "👁️"}
+                </button>
+              </div>
+              <span id="password-error" className="error-message">
+                {errores.contrasena}
+              </span>
+            </div>
 
-          {/* Botón */}
-          <button type="submit" className="signup-btn" disabled={cargando}>
-            {cargando ? "Validando..." : "iniciar sesión"}
-          </button>
-        </form>
+            {/* Link a registro */}
+            <div className="login-section">
+              <Link to="/signup" className="login-link">
+                ¿No tienes cuenta? Regístrate
+              </Link>
+            </div>
+
+            <button
+              type="submit"
+              className="signup-btn"
+              disabled={cargando}
+              aria-busy={cargando}
+            >
+              {cargando ? "Validando..." : "Iniciar sesión"}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
