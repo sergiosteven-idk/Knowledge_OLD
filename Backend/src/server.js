@@ -52,7 +52,7 @@ app.use((err, req, res, next) => {
 });
 
 // 🚀 Servidor
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5173;
 app.listen(PORT, () =>
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`)
 );

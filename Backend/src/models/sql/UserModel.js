@@ -1,35 +1,3 @@
-
-
-// Backend/src/models/userModel.js
-import mongoose from "mongoose";
-import bcrypt from "bcrypt";
-
-const userSchema = new mongoose.Schema(
-  {
-    usuario: { type: String, required: true, trim: true },
-    email: { type: String, required: true, unique: true, lowercase: true },
-    contrasena: { type: String, required: true },
-  },
-  { timestamps: true }
-);
-
-// Encriptar antes de guardar
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("contrasena")) return next();
-  this.contrasena = await bcrypt.hash(this.contrasena, 10);
-  next();
-});
-
-// Método para validar contraseñas
-userSchema.methods.compararContrasena = async function (password) {
-  return await bcrypt.compare(password, this.contrasena);
-};
-
-const User = mongoose.model("User", userSchema);
-
-export default User;
-
-// models/sql/UserModel.js
 import { mysqlConnection } from "../../../bds/mysql.js";
 
 export const createUser = async (user) => {
@@ -42,7 +10,7 @@ export const createUser = async (user) => {
 
 export const findUserByEmail = async (correo) => {
   const [rows] = await mysqlConnection.execute(
-    "SELECT * FROM Miembro WHERE correo = ?",
+    "SELECT * FROM Miembro WHERE correo = ? LIMIT 1",
     [correo]
   );
   return rows[0];
