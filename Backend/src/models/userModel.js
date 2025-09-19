@@ -17,3 +17,14 @@ export async function buscarUsuarioPorEmail(email) {
   );
   return rows[0];
 }
+
+const usuarios = [
+  { id: 1, nombre: "Juan Pérez", correo: "juan@example.com" },
+  { id: 2, nombre: "Ana López", correo: "ana@example.com" },
+];
+
+function getPerfil(userId) {
+  return usuarios.find(u => u.id === Number(userId));
+}
+
+module.exports = { getPerfil };
