@@ -287,3 +287,4 @@ body { background: var(--bg); color: var(--txt); }
   .header { grid-template-columns: auto 1fr; }
 }
 `;
+
