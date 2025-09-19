@@ -91,7 +91,7 @@ export default function Terminos() {
         </p>
         <ul>
           <li>📧 Correo: <a href="mailto:soporte@knowledge.org">soporte@knowledge.org</a></li>
-          <li>📱 WhatsApp: <a href="https://wa.me/573001112233" target="_blank" rel="noreferrer">+57 300 111 2233</a></li>
+          <li>📱 WhatsApp: <a href="https://wa.me/+573249111904" target="_blank" rel="noreferrer">+57 300 111 2233</a></li>
         </ul>
       </section>
 

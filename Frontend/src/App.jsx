@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Navbar from "./components/navbar.jsx";
-import Footer from "./components/footer.jsx";
+import Navbar from "./components/Navbar.jsx";
+import Footer from "./components/Footer.jsx";
 import Terminos from "./pages/tyc.jsx";
+import A11yBar from "./components/A11yBar.jsx";
+
 
 // Páginas
 import Home from "./pages/home.jsx";

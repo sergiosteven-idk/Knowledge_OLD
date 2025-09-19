@@ -1,0 +1,87 @@
+/* src/styles/A11yBar.css */
+
+.a11y-bar {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  font-family: system-ui, sans-serif;
+  z-index: 2000;
+}
+
+/* Botón principal */
+.a11y-toggle {
+  background: #10b981; /* Verde accesibilidad */
+  color: #ffffff;
+  padding: 0.6rem 1rem;
+  border-radius: 30px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  transition: background 0.3s ease;
+}
+
+.a11y-toggle:hover,
+.a11y-toggle:focus {
+  background: #059669; /* Verde más oscuro */
+  outline: none;
+}
+
+/* Panel de controles */
+.a11y-controls {
+  margin-top: 0.5rem;
+  background: #ffffff; /* Fondo claro */
+  color: #1e293b; /* Texto oscuro para contraste */
+  border: 2px solid #6b21a8; /* Morado inclusivo */
+  border-radius: 12px;
+  padding: 1rem;
+  max-width: 320px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Filas de botones */
+.a11y-row {
+  margin-bottom: 0.8rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+/* Botones secundarios */
+.a11y-row button {
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #6b21a8; /* Morado */
+  background: #f9f9f9;
+  color: #1e293b;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.a11y-row button:hover,
+.a11y-row button:focus {
+  background: #6b21a8;
+  color: #ffffff;
+  outline: none;
+}
+
+/* Estado activo */
+.a11y-row button.active {
+  background: #10b981;
+  color: #ffffff;
+  border-color: #10b981;
+}
+
+/* Botón de reset */
+.reset-btn {
+  background: #ef4444 !important; /* Rojo accesible */
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+}
+
+.reset-btn:hover,
+.reset-btn:focus {
+  background: #b91c1c !important; /* Rojo más oscuro */
+  border-color: #b91c1c !important;
+}

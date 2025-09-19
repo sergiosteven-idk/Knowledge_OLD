@@ -32,8 +32,8 @@ export default function Footer() {
         {/* Contacto rápido */}
         <div className="footer-contact">
           <h3>Contacto</h3>
-          <p>📧 contacto@knowledge.com</p>
-          <p>📱 WhatsApp: +57 300 000 0000</p>
+          <p>📧 knowledge@gmail.com</p>
+          <p>📱 WhatsApp: +57 324 860 8006</p>
         </div>
       </div>
 
