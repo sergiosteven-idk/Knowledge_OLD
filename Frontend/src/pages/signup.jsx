@@ -1,81 +1,102 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "../assets/CSS/signup_styles.css";
-import { registerUser } from "../services/authService";
+import { registerUser, authStorage } from "../services/authService"; // Importación única
 import A11yBar from "../components/A11yBar";
 
 export default function Signup() {
   const [usuario, setUsuario] = useState("");
   const [email, setEmail] = useState("");
   const [contrasena, setContrasena] = useState("");
+  const [aceptaTyC, setAceptaTyC] = useState(false);
   const [mensaje, setMensaje] = useState("");
   const [cargando, setCargando] = useState(false);
   const [errores, setErrores] = useState({
     usuario: "",
     email: "",
     contrasena: "",
+    tyc: "",
     general: "",
   });
 
   const navigate = useNavigate();
 
-  // ✅ Validaciones rápidas
+  // ✅ Validaciones mejoradas
   const validar = () => {
-    let ok = true;
-    const next = { usuario: "", email: "", contrasena: "", general: "" };
+    const nuevosErrores = {
+      usuario: "",
+      email: "",
+      contrasena: "",
+      tyc: "",
+      general: "",
+    };
 
-    if (!/^[a-zA-Z0-9._-]{3,50}$/.test(usuario)) {
-      next.usuario = "Usuario 3-50 caracteres (letras, números, . _ -)";
-      ok = false;
-    }
-    if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
-      next.email = "Correo inválido";
-      ok = false;
-    }
-    if (
-      contrasena.length < 6 ||
-      !/[a-zA-Z]/.test(contrasena) ||
-      !/[0-9]/.test(contrasena)
-    ) {
-      next.contrasena = "Mínimo 6 caracteres con letras y números";
-      ok = false;
+    let esValido = true;
+
+    // Validar usuario
+    if (!usuario.trim()) {
+      nuevosErrores.usuario = "El usuario es obligatorio";
+      esValido = false;
+    } else if (!/^[a-zA-Z0-9._-]{3,50}$/.test(usuario)) {
+      nuevosErrores.usuario = "Usuario 3-50 caracteres (letras, números, . _ -)";
+      esValido = false;
     }
 
-    setErrores(next);
-    return ok;
+    // Validar email
+    if (!email.trim()) {
+      nuevosErrores.email = "El correo es obligatorio";
+      esValido = false;
+    } else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
+      nuevosErrores.email = "Correo electrónico inválido";
+      esValido = false;
+    }
+
+    // Validar contraseña
+    if (!contrasena) {
+      nuevosErrores.contrasena = "La contraseña es obligatoria";
+      esValido = false;
+    } else if (contrasena.length < 6) {
+      nuevosErrores.contrasena = "Mínimo 6 caracteres";
+      esValido = false;
+    } else if (!/[a-zA-Z]/.test(contrasena) || !/[0-9]/.test(contrasena)) {
+      nuevosErrores.contrasena = "Debe contener letras y números";
+      esValido = false;
+    }
+
+    // Validar términos y condiciones
+    if (!aceptaTyC) {
+      nuevosErrores.tyc = "Debes aceptar los Términos y Condiciones";
+      esValido = false;
+    }
+
+    setErrores(nuevosErrores);
+    return esValido;
   };
 
-  // ✅ Enviar datos al backend
+  // ✅ Manejo de envío del formulario (versión corregida)
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     if (!validar()) return;
-
+    
     setCargando(true);
-    setErrores((prev) => ({ ...prev, general: "" }));
-
+    setErrores(prev => ({ ...prev, general: "" }));
+    
     try {
       const data = await registerUser({ usuario, email, contrasena });
-
-      if (data.token) {
-        // Guardar sesión en localStorage
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("usuario", data.user?.usuario || usuario);
-        localStorage.setItem("email", data.user?.email || email);
-
-        setMensaje("✅ Registro exitoso, redirigiendo...");
-
-        // Redirigir al dashboard
-        setTimeout(() => navigate("/dashboard"), 1500);
-      } else {
-        setErrores((prev) => ({
-          ...prev,
-          general: data.message || "Error en el registro",
-        }));
-      }
+      
+      // Guardar en localStorage usando authStorage
+      authStorage.set(data.token, data.user);
+      
+      setMensaje("✅ Registro exitoso, redirigiendo...");
+      
+      // Redirigir después de 1.5 segundos
+      setTimeout(() => navigate("/dashboard"), 1500);
+      
     } catch (err) {
-      setErrores((prev) => ({
+      setErrores(prev => ({
         ...prev,
-        general: err.message || "No se pudo conectar al servidor",
+        general: err.message || "Error en el registro. Intenta nuevamente."
       }));
     } finally {
       setCargando(false);
@@ -158,6 +179,29 @@ export default function Signup() {
               />
               <span id="password-error" className="error-message">
                 {errores.contrasena}
+              </span>
+            </div>
+
+            {/* Términos y Condiciones */}
+            <div className="form-group checkbox-group">
+              <div className="checkbox-wrapper">
+                <input
+                  type="checkbox"
+                  id="aceptar-tyc"
+                  checked={aceptaTyC}
+                  onChange={(e) => setAceptaTyC(e.target.checked)}
+                  aria-invalid={!!errores.tyc}
+                  aria-describedby="tyc-error"
+                />
+                <label htmlFor="aceptar-tyc" className="checkbox-label">
+                  Acepto los{" "}
+                  <Link to="/tyc" className="login-link" target="_blank">
+                    Términos y Condiciones
+                  </Link>
+                </label>
+              </div>
+              <span id="tyc-error" className="error-message">
+                {errores.tyc}
               </span>
             </div>
 
