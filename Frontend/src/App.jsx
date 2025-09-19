@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "./components/navbar.jsx";
 import Footer from "./components/footer.jsx";
+import PerfilUsuario from "./pages/PerfilUsuario.jsx";
+
 
 // Páginas
 import Home from "./pages/home.jsx";
@@ -27,7 +29,7 @@ export default function App() {
           <Route path="/discapacidad" element={<Discapacidad />} />
           <Route path="/informacion" element={<Informacion />} />
           <Route path="/contacto" element={<Contacto />} />
-          
+
 
           {/* Protegida */}
           <Route
@@ -35,6 +37,15 @@ export default function App() {
             element={
               <PrivateRoute>
                 <Userhome />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/perfil"
+            element={
+              <PrivateRoute>
+              <PerfilUsuario />
               </PrivateRoute>
             }
           />
