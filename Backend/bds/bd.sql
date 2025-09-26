@@ -1,10 +1,10 @@
-CREATE DATABASE KNOWLEDGE;
+CREATE DATABASE IF NOT EXISTS KNOWLEDGE;
 USE KNOWLEDGE;
 
 -- =========================
 -- USUARIOS Y ADMINISTRACIÓN
 -- =========================
-CREATE TABLE Administrador (
+CREATE TABLE IF NOT EXISTS Administrador (
     id_admin INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     correo VARCHAR(100) UNIQUE NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE Administrador (
     tipo_admin ENUM('super', 'editor', 'moderador') DEFAULT 'editor'
 );
 
-CREATE TABLE Miembro (
+CREATE TABLE IF NOT EXISTS Miembro (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     apellido VARCHAR(100) NOT NULL,
@@ -26,19 +26,19 @@ CREATE TABLE Miembro (
 -- =========================
 -- ROLES Y PERMISOS
 -- =========================
-CREATE TABLE Rol (
+CREATE TABLE IF NOT EXISTS Rol (
     id_rol INT AUTO_INCREMENT PRIMARY KEY,
     nombre_rol VARCHAR(100) NOT NULL,
     descripcion TEXT
 );
 
-CREATE TABLE Permiso (
+CREATE TABLE IF NOT EXISTS Permiso (
     id_permiso INT AUTO_INCREMENT PRIMARY KEY,
     accion VARCHAR(100) NOT NULL,
     recurso VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE Rol_Permiso (
+CREATE TABLE IF NOT EXISTS Rol_Permiso (
     id_rol INT,
     id_permiso INT,
     PRIMARY KEY (id_rol, id_permiso),
@@ -46,7 +46,7 @@ CREATE TABLE Rol_Permiso (
     FOREIGN KEY (id_permiso) REFERENCES Permiso(id_permiso)
 );
 
-CREATE TABLE Usuario_Rol (
+CREATE TABLE IF NOT EXISTS Usuario_Rol (
     id_usuario INT,
     id_rol INT,
     PRIMARY KEY (id_usuario, id_rol),
@@ -57,7 +57,7 @@ CREATE TABLE Usuario_Rol (
 -- =========================
 -- DONACIONES
 -- =========================
-CREATE TABLE Donaciones (
+CREATE TABLE IF NOT EXISTS Donaciones (
     id_donacion INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT NOT NULL,
     monto DECIMAL(10,2) NOT NULL,
@@ -69,7 +69,7 @@ CREATE TABLE Donaciones (
 -- =========================
 -- CURSOS Y PROGRESO
 -- =========================
-CREATE TABLE Curso (
+CREATE TABLE IF NOT EXISTS Curso (
     id_curso INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(200) NOT NULL,
     descripcion TEXT,
@@ -79,7 +79,7 @@ CREATE TABLE Curso (
     fecha_fin DATE
 );
 
-CREATE TABLE Modulo (
+CREATE TABLE IF NOT EXISTS Modulo (
     id_modulo INT AUTO_INCREMENT PRIMARY KEY,
     nombre_modulo VARCHAR(200) NOT NULL,
     descripcion TEXT,
@@ -87,7 +87,7 @@ CREATE TABLE Modulo (
     FOREIGN KEY (id_curso) REFERENCES Curso(id_curso)
 );
 
-CREATE TABLE Progreso (
+CREATE TABLE IF NOT EXISTS Progreso (
     id_progreso INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT NOT NULL,
     id_modulo INT NOT NULL,
@@ -100,7 +100,7 @@ CREATE TABLE Progreso (
 -- =========================
 -- EVALUACIONES
 -- =========================
-CREATE TABLE Evaluacion (
+CREATE TABLE IF NOT EXISTS Evaluacion (
     id_evaluacion INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(200) NOT NULL,
     descripcion TEXT,
@@ -109,7 +109,7 @@ CREATE TABLE Evaluacion (
     FOREIGN KEY (id_modulo) REFERENCES Modulo(id_modulo)
 );
 
-CREATE TABLE Pregunta (
+CREATE TABLE IF NOT EXISTS Pregunta (
     id_pregunta INT AUTO_INCREMENT PRIMARY KEY,
     texto TEXT NOT NULL,
     tipo ENUM('opcion_multiple', 'verdadero_falso', 'respuesta_abierta'),
@@ -119,7 +119,7 @@ CREATE TABLE Pregunta (
     FOREIGN KEY (id_evaluacion) REFERENCES Evaluacion(id_evaluacion)
 );
 
-CREATE TABLE Resultado (
+CREATE TABLE IF NOT EXISTS Resultado (
     id_resultado INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT NOT NULL,
     id_evaluacion INT NOT NULL,
@@ -127,4 +127,25 @@ CREATE TABLE Resultado (
     fecha_realizacion DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_usuario) REFERENCES Miembro(id_usuario),
     FOREIGN KEY (id_evaluacion) REFERENCES Evaluacion(id_evaluacion)
+);
+
+-- =========================
+-- INSERTAR ADMIN POR DEFECTO
+-- =========================
+INSERT INTO Administrador (nombre, correo, contrasena, tipo_admin)
+VALUES (
+  'Super Admin',
+  'admin@knowledge.com',
+  '$2b$10$mp8Z04.5IOwZTuHGTFHwe.3GyQv3ewdTrgF/TMkTn.MlZPR25NuxO',
+  'super'
+);
+
+INSERT INTO Miembro (nombre, apellido, correo, contrasena, tipo_usuario, id_admin)
+VALUES (
+  'Super',
+  'Admin',
+  'admin@knowledge.com',
+  '$2b$10$mp8Z04.5IOwZTuHGTFHwe.3GyQv3ewdTrgF/TMkTn.MlZPR25NuxO',
+  'docente',
+  1
 );

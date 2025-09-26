@@ -8,23 +8,23 @@ import A11yBar from "../components/A11yBar";
 export default function Login() {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
+  const [correo, setCorreo] = useState("");
   const [contrasena, setContrasena] = useState("");
   const [verPass, setVerPass] = useState(false);
   const [cargando, setCargando] = useState(false);
   const [errores, setErrores] = useState({
-    email: "",
+    correo: "",
     contrasena: "",
     general: "",
   });
 
-  // ✅ Validación básica antes de enviar
+  // ✅ Validación
   const validar = () => {
     let ok = true;
-    const next = { email: "", contrasena: "", general: "" };
+    const next = { correo: "", contrasena: "", general: "" };
 
-    if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
-      next.email = "El correo no tiene un formato válido";
+    if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(correo)) {
+      next.correo = "El correo no tiene un formato válido";
       ok = false;
     }
     if (
@@ -46,20 +46,31 @@ export default function Login() {
     if (!validar()) return;
 
     setCargando(true);
-    setErrores({ email: "", contrasena: "", general: "" });
+    setErrores({ correo: "", contrasena: "", general: "" });
 
     try {
-      // 👇 importante: tu backend espera "email" y "contrasena"
-      const data = await loginUser({ email, contrasena });
+      const data = await loginUser({ correo, contrasena });
 
-      if (data.token) {
-        // Guardar en localStorage
+      if (data.token && data.user) {
+        // Guardar en localStorage toda la info útil
         localStorage.setItem("token", data.token);
-        localStorage.setItem("usuario", data.user?.usuario || "");
-        localStorage.setItem("email", data.user?.email || email);
+        localStorage.setItem("user", JSON.stringify(data.user)); // incluye tipo_usuario
+        localStorage.setItem("correo", data.user.correo);
 
-        // Redirigir a la zona privada
-        navigate("/dashboard");
+        // Redirigir según token (robusto) o user como respaldo
+        let role = "";
+        let isAdmin = false;
+        try {
+          const payload = JSON.parse(atob(data.token.split(".")[1]));
+          role = String(payload.role ?? payload.rol ?? "").toLowerCase();
+          isAdmin = Boolean(payload.is_admin ?? role === "admin");
+        } catch {}
+
+        if (isAdmin || role === "admin" || data.user.tipo_usuario === "admin") {
+          navigate("/admin/dashboard"); // 👈 cambio: ir directo al dashboard
+        } else {
+          navigate("/dashboard");
+        }
       } else {
         setErrores((prev) => ({
           ...prev,
@@ -82,7 +93,6 @@ export default function Login() {
 
       <div className="signup-container">
         <div className="signup-card">
-          {/* Logo */}
           <div className="logo-section">
             <div className="logo-container">
               <img src={logoImg} alt="Logo Knowledge" className="logo" />
@@ -97,41 +107,34 @@ export default function Login() {
             noValidate
             aria-label="Formulario de inicio de sesión"
           >
-            {/* Mensaje de error general */}
             {errores.general && (
-              <div
-                className="general-error"
-                role="alert"
-                aria-live="assertive"
-              >
+              <div className="general-error" role="alert" aria-live="assertive">
                 {errores.general}
               </div>
             )}
 
-            {/* Email */}
             <div className="form-group">
-              <label htmlFor="email" className="form-label">
+              <label htmlFor="correo" className="form-label">
                 Correo electrónico
               </label>
               <input
                 type="email"
-                id="email"
-                name="email"
+                id="correo"
+                name="correo"
                 className="form-input"
                 autoComplete="email"
                 maxLength={50}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={correo}
+                onChange={(e) => setCorreo(e.target.value)}
                 required
-                aria-invalid={!!errores.email}
-                aria-describedby="email-error"
+                aria-invalid={!!errores.correo}
+                aria-describedby="correo-error"
               />
-              <span id="email-error" className="error-message">
-                {errores.email}
+              <span id="correo-error" className="error-message">
+                {errores.correo}
               </span>
             </div>
 
-            {/* Contraseña */}
             <div className="form-group">
               <label htmlFor="contrasena" className="form-label">
                 Contraseña
@@ -165,7 +168,6 @@ export default function Login() {
               </span>
             </div>
 
-            {/* Link a registro */}
             <div className="login-section">
               <Link to="/signup" className="login-link">
                 ¿No tienes cuenta? Regístrate

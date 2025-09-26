@@ -38,7 +38,7 @@ export default function Home() {
           <button className="talkback-btn" onClick={talkbackIntro} aria-pressed="false">🔊 Activar TalkBack</button>
           <button onClick={() => {
             // abre modal de LS (aquí placeholder)
-            alert("Abrir video en lenguaje de señas (implementa enlace al intérprete o video).");
+            alert("Estamos trabajando para incorporar el lenguaje de señas, agradecemos comprensión.");
           }}>👐 Ver en LS</button>
         </div>
       </section>

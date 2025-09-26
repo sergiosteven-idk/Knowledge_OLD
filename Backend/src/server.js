@@ -4,14 +4,12 @@ import dotenv from "dotenv";
 import cors from "cors";
 import helmet from "helmet";
 
-import connectMongo from "../bds/mongodb.js";
-import { mysqlConnection } from "../bds/mysql.js";
+import connectMongo from "../bds/mongodb.js";        // si lo estás usando
+import pool from "./db.js";                           // ← usa el MISMO pool que usan los modelos
 
 // Rutas
 import authRoutes from "./routes/auth.js";
-// import userRoutes from "./routes/user.routes.js";
-// import blogRoutes from "./routes/blog.routes.js";
-// import feedbackRoutes from "./routes/feedback.routes.js";
+import userRoutes from "./routes/users.routes.js";
 
 dotenv.config();
 
@@ -20,7 +18,7 @@ const app = express();
 // 🔒 seguridad + CORS
 app.use(helmet());
 app.use(cors({
-  origin: "http://localhost:5173",   // frontend
+  origin: "http://localhost:5173",
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
@@ -28,22 +26,23 @@ app.use(cors({
 // 📦 middlewares
 app.use(express.json());
 
-// 🌐 Conexión Mongo
-connectMongo();
+// 🌐 Conexión Mongo (si aplica)
+connectMongo().catch(err => console.error("❌ Error Mongo:", err));
 
-// 🗄️ Conexión MySQL
-mysqlConnection.getConnection()
-  .then(conn => {
+// 🗄️ Probar conexión MySQL usando el mismo pool de src/db.js
+(async () => {
+  try {
+    const conn = await pool.getConnection();
     console.log("✅ Conectado a MySQL");
     conn.release();
-  })
-  .catch(err => console.error("❌ Error MySQL:", err));
+  } catch (err) {
+    console.error("❌ Error MySQL:", err);
+  }
+})();
 
 // 📌 Rutas
 app.use("/api/auth", authRoutes);
-// app.use("/api/users", userRoutes);
-// app.use("/api/blog", blogRoutes);
-// app.use("/api/feedback", feedbackRoutes);
+app.use("/api/users", userRoutes);
 
 // 🛠 Manejo de errores global
 app.use((err, req, res, next) => {
@@ -52,7 +51,7 @@ app.use((err, req, res, next) => {
 });
 
 // 🚀 Servidor
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3306;
 app.listen(PORT, () =>
-  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`)
+  console.log(`🚀 Servidor corriendo en http://localhost:3306`)
 );
