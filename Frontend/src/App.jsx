@@ -22,7 +22,7 @@ import Dashboard from "./pages/adminZone/Dashboard.jsx";
 import AdminProfile from "./pages/adminZone/AdminProfile.jsx";
 import ManageUser from "./pages/adminZone/Manageuser.jsx";
 import UploadFiles from "./pages/adminZone/Uploadfiles.jsx";
-import UserCards from "./pages/adminZone/UserCards.jsx"; // plural y mayúsculas correctas
+import UserCards from "./pages/adminZone/UserCards.jsx"; 
 
 export default function App() {
   return (
@@ -49,6 +49,9 @@ export default function App() {
               </PrivateRoute>
             }
           />
+
+          {/* 🧭 Alias por compatibilidad: si algo aún navega a /userZone */}
+          <Route path="/userZone" element={<Navigate to="/dashboard" replace />} />
 
           {/* ===== Zona Admin ===== */}
           {/* /admin -> dashboard */}
@@ -113,9 +116,7 @@ export default function App() {
           <Route path="/admin/UserCards" element={<Navigate to="/admin/cards" replace />} />
           <Route path="/admin/usercard" element={<Navigate to="/admin/cards" replace />} />
           <Route path="/admin/UserCard" element={<Navigate to="/admin/cards" replace />} />
-          {/* alias por si tenías guion medio */}
           <Route path="/admin/user-cards" element={<Navigate to="/admin/cards" replace />} />
-          {/* alias para upload con guion medio */}
           <Route path="/admin/upload-files" element={<Navigate to="/admin/upload" replace />} />
 
           {/* 404 */}

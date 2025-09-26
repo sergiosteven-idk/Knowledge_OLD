@@ -5,31 +5,37 @@ import { registerUser } from "../services/authService";
 import A11yBar from "../components/A11yBar";
 
 export default function Signup() {
-  const [usuario, setUsuario] = useState("");
-  const [email, setEmail] = useState("");
+  const [nombre, setNombre] = useState("");
+  const [apellido, setApellido] = useState("");
+  const [correo, setCorreo] = useState("");
   const [contrasena, setContrasena] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [cargando, setCargando] = useState(false);
   const [errores, setErrores] = useState({
-    usuario: "",
-    email: "",
+    nombre: "",
+    apellido: "",
+    correo: "",
     contrasena: "",
     general: "",
   });
 
   const navigate = useNavigate();
 
-  // ✅ Validaciones rápidas
+  // ✅ Validaciones
   const validar = () => {
     let ok = true;
-    const next = { usuario: "", email: "", contrasena: "", general: "" };
+    const next = { nombre: "", apellido: "", correo: "", contrasena: "", general: "" };
 
-    if (!/^[a-zA-Z0-9._-]{3,50}$/.test(usuario)) {
-      next.usuario = "Usuario 3-50 caracteres (letras, números, . _ -)";
+    if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{2,50}$/.test(nombre)) {
+      next.nombre = "Nombre entre 2 y 50 caracteres (solo letras)";
       ok = false;
     }
-    if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
-      next.email = "Correo inválido";
+    if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{2,50}$/.test(apellido)) {
+      next.apellido = "Apellido entre 2 y 50 caracteres (solo letras)";
+      ok = false;
+    }
+    if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(correo)) {
+      next.correo = "Correo inválido";
       ok = false;
     }
     if (
@@ -54,17 +60,18 @@ export default function Signup() {
     setErrores((prev) => ({ ...prev, general: "" }));
 
     try {
-      const data = await registerUser({ usuario, email, contrasena });
+      const data = await registerUser({ nombre, apellido, correo, contrasena });
 
       if (data.token) {
-        // Guardar sesión en localStorage
+        // Guardar sesión
         localStorage.setItem("token", data.token);
-        localStorage.setItem("usuario", data.user?.usuario || usuario);
-        localStorage.setItem("email", data.user?.email || email);
+        localStorage.setItem("nombre", data.user?.nombre || nombre);
+        localStorage.setItem("apellido", data.user?.apellido || apellido);
+        localStorage.setItem("correo", data.user?.correo || correo);
+        // Compatibilidad si otras vistas aún leen "email"
+        localStorage.setItem("email", data.user?.correo || correo);
 
         setMensaje("✅ Registro exitoso, redirigiendo...");
-
-        // Redirigir al dashboard
         setTimeout(() => navigate("/dashboard"), 1500);
       } else {
         setErrores((prev) => ({
@@ -102,50 +109,55 @@ export default function Signup() {
               </div>
             )}
 
-            {/* Usuario */}
+            {/* Nombre */}
             <div className="form-group">
-              <label htmlFor="usuario" className="form-label">
-                Usuario
-              </label>
+              <label htmlFor="nombre" className="form-label">Nombre</label>
               <input
-                id="usuario"
+                id="nombre"
                 className="form-input"
-                value={usuario}
-                onChange={(e) => setUsuario(e.target.value)}
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
                 required
-                aria-invalid={!!errores.usuario}
-                aria-describedby="usuario-error"
+                aria-invalid={!!errores.nombre}
+                aria-describedby="nombre-error"
               />
-              <span id="usuario-error" className="error-message">
-                {errores.usuario}
-              </span>
+              <span id="nombre-error" className="error-message">{errores.nombre}</span>
+            </div>
+
+            {/* Apellido */}
+            <div className="form-group">
+              <label htmlFor="apellido" className="form-label">Apellido</label>
+              <input
+                id="apellido"
+                className="form-input"
+                value={apellido}
+                onChange={(e) => setApellido(e.target.value)}
+                required
+                aria-invalid={!!errores.apellido}
+                aria-describedby="apellido-error"
+              />
+              <span id="apellido-error" className="error-message">{errores.apellido}</span>
             </div>
 
             {/* Correo */}
             <div className="form-group">
-              <label htmlFor="email" className="form-label">
-                Correo
-              </label>
+              <label htmlFor="correo" className="form-label">Correo</label>
               <input
                 type="email"
-                id="email"
+                id="correo"
                 className="form-input"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={correo}
+                onChange={(e) => setCorreo(e.target.value)}
                 required
-                aria-invalid={!!errores.email}
-                aria-describedby="email-error"
+                aria-invalid={!!errores.correo}
+                aria-describedby="correo-error"
               />
-              <span id="email-error" className="error-message">
-                {errores.email}
-              </span>
+              <span id="correo-error" className="error-message">{errores.correo}</span>
             </div>
 
             {/* Contraseña */}
             <div className="form-group">
-              <label htmlFor="contrasena" className="form-label">
-                Contraseña
-              </label>
+              <label htmlFor="contrasena" className="form-label">Contraseña</label>
               <input
                 type="password"
                 id="contrasena"
@@ -156,9 +168,7 @@ export default function Signup() {
                 aria-invalid={!!errores.contrasena}
                 aria-describedby="password-error"
               />
-              <span id="password-error" className="error-message">
-                {errores.contrasena}
-              </span>
+              <span id="password-error" className="error-message">{errores.contrasena}</span>
             </div>
 
             {/* Botón */}
