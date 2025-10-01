@@ -66,10 +66,10 @@ export default function Login() {
           isAdmin = Boolean(payload.is_admin ?? role === "admin");
         } catch {}
 
-        if (isAdmin || role === "admin" || data.user.tipo_usuario === "admin") {
-          navigate("/admin/dashboard"); // 👈 cambio: ir directo al dashboard
+        if (isAdmin || role === "docente" || data.user.tipo_usuario === "admin") {
+          navigate("/Dashboard"); 
         } else {
-          navigate("/dashboard");
+          navigate("/userhome");
         }
       } else {
         setErrores((prev) => ({

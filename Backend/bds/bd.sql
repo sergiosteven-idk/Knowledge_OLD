@@ -1,151 +1,395 @@
-CREATE DATABASE IF NOT EXISTS KNOWLEDGE;
-USE KNOWLEDGE;
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Servidor: 127.0.0.1
+-- Tiempo de generación: 01-10-2025 a las 16:23:10
+-- Versión del servidor: 10.4.32-MariaDB
+-- Versión de PHP: 8.2.12
 
--- =========================
--- USUARIOS Y ADMINISTRACIÓN
--- =========================
-CREATE TABLE IF NOT EXISTS Administrador (
-    id_admin INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    correo VARCHAR(100) UNIQUE NOT NULL,
-    contrasena VARCHAR(255) NOT NULL,
-    tipo_admin ENUM('super', 'editor', 'moderador') DEFAULT 'editor'
-);
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
 
-CREATE TABLE IF NOT EXISTS Miembro (
-    id_usuario INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    apellido VARCHAR(100) NOT NULL,
-    correo VARCHAR(100) UNIQUE NOT NULL,
-    contrasena VARCHAR(255) NOT NULL,
-    tipo_usuario ENUM('estudiante', 'docente', 'invitado') DEFAULT 'estudiante',
-    id_admin INT,
-    FOREIGN KEY (id_admin) REFERENCES Administrador(id_admin)
-);
 
--- =========================
--- ROLES Y PERMISOS
--- =========================
-CREATE TABLE IF NOT EXISTS Rol (
-    id_rol INT AUTO_INCREMENT PRIMARY KEY,
-    nombre_rol VARCHAR(100) NOT NULL,
-    descripcion TEXT
-);
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
 
-CREATE TABLE IF NOT EXISTS Permiso (
-    id_permiso INT AUTO_INCREMENT PRIMARY KEY,
-    accion VARCHAR(100) NOT NULL,
-    recurso VARCHAR(100) NOT NULL
-);
+--
+-- Base de datos: `knowledge`
+--
 
-CREATE TABLE IF NOT EXISTS Rol_Permiso (
-    id_rol INT,
-    id_permiso INT,
-    PRIMARY KEY (id_rol, id_permiso),
-    FOREIGN KEY (id_rol) REFERENCES Rol(id_rol),
-    FOREIGN KEY (id_permiso) REFERENCES Permiso(id_permiso)
-);
+-- --------------------------------------------------------
 
-CREATE TABLE IF NOT EXISTS Usuario_Rol (
-    id_usuario INT,
-    id_rol INT,
-    PRIMARY KEY (id_usuario, id_rol),
-    FOREIGN KEY (id_usuario) REFERENCES Miembro(id_usuario),
-    FOREIGN KEY (id_rol) REFERENCES Rol(id_rol)
-);
+--
+-- Estructura de tabla para la tabla `administrador`
+--
 
--- =========================
--- DONACIONES
--- =========================
-CREATE TABLE IF NOT EXISTS Donaciones (
-    id_donacion INT AUTO_INCREMENT PRIMARY KEY,
-    id_usuario INT NOT NULL,
-    monto DECIMAL(10,2) NOT NULL,
-    fecha_donacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-    metodo_pago ENUM('tarjeta', 'paypal', 'transferencia'),
-    FOREIGN KEY (id_usuario) REFERENCES Miembro(id_usuario)
-);
+CREATE TABLE `administrador` (
+  `id_admin` int(11) NOT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `correo` varchar(100) NOT NULL,
+  `contrasena` varchar(255) NOT NULL,
+  `tipo_admin` enum('super','editor','moderador') DEFAULT 'editor'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- =========================
--- CURSOS Y PROGRESO
--- =========================
-CREATE TABLE IF NOT EXISTS Curso (
-    id_curso INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(200) NOT NULL,
-    descripcion TEXT,
-    categoria VARCHAR(100),
-    nivel ENUM('básico', 'intermedio', 'avanzado') DEFAULT 'básico',
-    fecha_inicio DATE,
-    fecha_fin DATE
-);
+--
+-- Volcado de datos para la tabla `administrador`
+--
 
-CREATE TABLE IF NOT EXISTS Modulo (
-    id_modulo INT AUTO_INCREMENT PRIMARY KEY,
-    nombre_modulo VARCHAR(200) NOT NULL,
-    descripcion TEXT,
-    id_curso INT NOT NULL,
-    FOREIGN KEY (id_curso) REFERENCES Curso(id_curso)
-);
+INSERT INTO `administrador` (`id_admin`, `nombre`, `correo`, `contrasena`, `tipo_admin`) VALUES
+(1, 'Super Admin', 'admin@knowledge.com', '$2b$10$mp8Z04.5IOwZTuHGTFHwe.3GyQv3ewdTrgF/TMkTn.MlZPR25NuxO', 'super');
 
-CREATE TABLE IF NOT EXISTS Progreso (
-    id_progreso INT AUTO_INCREMENT PRIMARY KEY,
-    id_usuario INT NOT NULL,
-    id_modulo INT NOT NULL,
-    estado ENUM('pendiente', 'en progreso', 'completado') DEFAULT 'pendiente',
-    ultima_modificacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_usuario) REFERENCES Miembro(id_usuario),
-    FOREIGN KEY (id_modulo) REFERENCES Modulo(id_modulo)
-);
+-- --------------------------------------------------------
 
--- =========================
--- EVALUACIONES
--- =========================
-CREATE TABLE IF NOT EXISTS Evaluacion (
-    id_evaluacion INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(200) NOT NULL,
-    descripcion TEXT,
-    tipo ENUM('quiz', 'examen', 'práctica') DEFAULT 'quiz',
-    id_modulo INT NOT NULL,
-    FOREIGN KEY (id_modulo) REFERENCES Modulo(id_modulo)
-);
+--
+-- Estructura de tabla para la tabla `curso`
+--
 
-CREATE TABLE IF NOT EXISTS Pregunta (
-    id_pregunta INT AUTO_INCREMENT PRIMARY KEY,
-    texto TEXT NOT NULL,
-    tipo ENUM('opcion_multiple', 'verdadero_falso', 'respuesta_abierta'),
-    opciones JSON,
-    respuesta_correcta TEXT,
-    id_evaluacion INT NOT NULL,
-    FOREIGN KEY (id_evaluacion) REFERENCES Evaluacion(id_evaluacion)
-);
+CREATE TABLE `curso` (
+  `id_curso` int(11) NOT NULL,
+  `nombre` varchar(200) NOT NULL,
+  `descripcion` text DEFAULT NULL,
+  `categoria` varchar(100) DEFAULT NULL,
+  `nivel` enum('básico','intermedio','avanzado') DEFAULT 'básico',
+  `fecha_inicio` date DEFAULT NULL,
+  `fecha_fin` date DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE IF NOT EXISTS Resultado (
-    id_resultado INT AUTO_INCREMENT PRIMARY KEY,
-    id_usuario INT NOT NULL,
-    id_evaluacion INT NOT NULL,
-    calificacion DECIMAL(5,2),
-    fecha_realizacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_usuario) REFERENCES Miembro(id_usuario),
-    FOREIGN KEY (id_evaluacion) REFERENCES Evaluacion(id_evaluacion)
-);
+-- --------------------------------------------------------
 
--- =========================
--- INSERTAR ADMIN POR DEFECTO
--- =========================
-INSERT INTO Administrador (nombre, correo, contrasena, tipo_admin)
-VALUES (
-  'Super Admin',
-  'admin@knowledge.com',
-  '$2b$10$mp8Z04.5IOwZTuHGTFHwe.3GyQv3ewdTrgF/TMkTn.MlZPR25NuxO',
-  'super'
-);
+--
+-- Estructura de tabla para la tabla `donaciones`
+--
 
-INSERT INTO Miembro (nombre, apellido, correo, contrasena, tipo_usuario, id_admin)
-VALUES (
-  'Super',
-  'Admin',
-  'admin@knowledge.com',
-  '$2b$10$mp8Z04.5IOwZTuHGTFHwe.3GyQv3ewdTrgF/TMkTn.MlZPR25NuxO',
-  'docente',
-  1
-);
+CREATE TABLE `donaciones` (
+  `id_donacion` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `monto` decimal(10,2) NOT NULL,
+  `fecha_donacion` datetime DEFAULT current_timestamp(),
+  `metodo_pago` enum('tarjeta','paypal','transferencia') DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `evaluacion`
+--
+
+CREATE TABLE `evaluacion` (
+  `id_evaluacion` int(11) NOT NULL,
+  `nombre` varchar(200) NOT NULL,
+  `descripcion` text DEFAULT NULL,
+  `tipo` enum('quiz','examen','práctica') DEFAULT 'quiz',
+  `id_modulo` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `miembro`
+--
+
+CREATE TABLE `miembro` (
+  `id_usuario` int(11) NOT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `apellido` varchar(100) NOT NULL,
+  `correo` varchar(100) NOT NULL,
+  `contrasena` varchar(255) NOT NULL,
+  `tipo_usuario` enum('estudiante','docente','invitado') DEFAULT 'estudiante',
+  `id_admin` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `miembro`
+--
+
+INSERT INTO `miembro` (`id_usuario`, `nombre`, `apellido`, `correo`, `contrasena`, `tipo_usuario`, `id_admin`) VALUES
+(1, 'Super', 'Admin', 'admin@knowledge.com', '$2b$10$mp8Z04.5IOwZTuHGTFHwe.3GyQv3ewdTrgF/TMkTn.MlZPR25NuxO', 'docente', 1),
+(2, 'culma', 'santofimio', 'faraon@santofimio.com', '$2b$10$S9Hl.VyVfCygKSv6hA57qOaQcF/S69l19/fJjrMG/eireLlmstL2.', 'estudiante', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `modulo`
+--
+
+CREATE TABLE `modulo` (
+  `id_modulo` int(11) NOT NULL,
+  `nombre_modulo` varchar(200) NOT NULL,
+  `descripcion` text DEFAULT NULL,
+  `id_curso` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `permiso`
+--
+
+CREATE TABLE `permiso` (
+  `id_permiso` int(11) NOT NULL,
+  `accion` varchar(100) NOT NULL,
+  `recurso` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `pregunta`
+--
+
+CREATE TABLE `pregunta` (
+  `id_pregunta` int(11) NOT NULL,
+  `texto` text NOT NULL,
+  `tipo` enum('opcion_multiple','verdadero_falso','respuesta_abierta') DEFAULT NULL,
+  `opciones` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`opciones`)),
+  `respuesta_correcta` text DEFAULT NULL,
+  `id_evaluacion` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `progreso`
+--
+
+CREATE TABLE `progreso` (
+  `id_progreso` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `id_modulo` int(11) NOT NULL,
+  `estado` enum('pendiente','en progreso','completado') DEFAULT 'pendiente',
+  `ultima_modificacion` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `resultado`
+--
+
+CREATE TABLE `resultado` (
+  `id_resultado` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `id_evaluacion` int(11) NOT NULL,
+  `calificacion` decimal(5,2) DEFAULT NULL,
+  `fecha_realizacion` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `rol`
+--
+
+CREATE TABLE `rol` (
+  `id_rol` int(11) NOT NULL,
+  `nombre_rol` varchar(100) NOT NULL,
+  `descripcion` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Índices para tablas volcadas
+--
+
+--
+-- Indices de la tabla `administrador`
+--
+ALTER TABLE `administrador`
+  ADD PRIMARY KEY (`id_admin`),
+  ADD UNIQUE KEY `correo` (`correo`);
+
+--
+-- Indices de la tabla `curso`
+--
+ALTER TABLE `curso`
+  ADD PRIMARY KEY (`id_curso`);
+
+--
+-- Indices de la tabla `donaciones`
+--
+ALTER TABLE `donaciones`
+  ADD PRIMARY KEY (`id_donacion`),
+  ADD KEY `id_usuario` (`id_usuario`);
+
+--
+-- Indices de la tabla `evaluacion`
+--
+ALTER TABLE `evaluacion`
+  ADD PRIMARY KEY (`id_evaluacion`),
+  ADD KEY `id_modulo` (`id_modulo`);
+
+--
+-- Indices de la tabla `miembro`
+--
+ALTER TABLE `miembro`
+  ADD PRIMARY KEY (`id_usuario`),
+  ADD UNIQUE KEY `correo` (`correo`),
+  ADD KEY `id_admin` (`id_admin`);
+
+--
+-- Indices de la tabla `modulo`
+--
+ALTER TABLE `modulo`
+  ADD PRIMARY KEY (`id_modulo`),
+  ADD KEY `id_curso` (`id_curso`);
+
+--
+-- Indices de la tabla `permiso`
+--
+ALTER TABLE `permiso`
+  ADD PRIMARY KEY (`id_permiso`);
+
+--
+-- Indices de la tabla `pregunta`
+--
+ALTER TABLE `pregunta`
+  ADD PRIMARY KEY (`id_pregunta`),
+  ADD KEY `id_evaluacion` (`id_evaluacion`);
+
+--
+-- Indices de la tabla `progreso`
+--
+ALTER TABLE `progreso`
+  ADD PRIMARY KEY (`id_progreso`),
+  ADD KEY `id_usuario` (`id_usuario`),
+  ADD KEY `id_modulo` (`id_modulo`);
+
+--
+-- Indices de la tabla `resultado`
+--
+ALTER TABLE `resultado`
+  ADD PRIMARY KEY (`id_resultado`),
+  ADD KEY `id_usuario` (`id_usuario`),
+  ADD KEY `id_evaluacion` (`id_evaluacion`);
+
+--
+-- Indices de la tabla `rol`
+--
+ALTER TABLE `rol`
+  ADD PRIMARY KEY (`id_rol`);
+
+--
+-- AUTO_INCREMENT de las tablas volcadas
+--
+
+--
+-- AUTO_INCREMENT de la tabla `administrador`
+--
+ALTER TABLE `administrador`
+  MODIFY `id_admin` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de la tabla `curso`
+--
+ALTER TABLE `curso`
+  MODIFY `id_curso` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `donaciones`
+--
+ALTER TABLE `donaciones`
+  MODIFY `id_donacion` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `evaluacion`
+--
+ALTER TABLE `evaluacion`
+  MODIFY `id_evaluacion` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `miembro`
+--
+ALTER TABLE `miembro`
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de la tabla `modulo`
+--
+ALTER TABLE `modulo`
+  MODIFY `id_modulo` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `permiso`
+--
+ALTER TABLE `permiso`
+  MODIFY `id_permiso` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `pregunta`
+--
+ALTER TABLE `pregunta`
+  MODIFY `id_pregunta` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `progreso`
+--
+ALTER TABLE `progreso`
+  MODIFY `id_progreso` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `resultado`
+--
+ALTER TABLE `resultado`
+  MODIFY `id_resultado` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `rol`
+--
+ALTER TABLE `rol`
+  MODIFY `id_rol` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- Restricciones para tablas volcadas
+--
+
+--
+-- Filtros para la tabla `donaciones`
+--
+ALTER TABLE `donaciones`
+  ADD CONSTRAINT `donaciones_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `miembro` (`id_usuario`);
+
+--
+-- Filtros para la tabla `evaluacion`
+--
+ALTER TABLE `evaluacion`
+  ADD CONSTRAINT `evaluacion_ibfk_1` FOREIGN KEY (`id_modulo`) REFERENCES `modulo` (`id_modulo`);
+
+--
+-- Filtros para la tabla `miembro`
+--
+ALTER TABLE `miembro`
+  ADD CONSTRAINT `miembro_ibfk_1` FOREIGN KEY (`id_admin`) REFERENCES `administrador` (`id_admin`);
+
+--
+-- Filtros para la tabla `modulo`
+--
+ALTER TABLE `modulo`
+  ADD CONSTRAINT `modulo_ibfk_1` FOREIGN KEY (`id_curso`) REFERENCES `curso` (`id_curso`);
+
+--
+-- Filtros para la tabla `pregunta`
+--
+ALTER TABLE `pregunta`
+  ADD CONSTRAINT `pregunta_ibfk_1` FOREIGN KEY (`id_evaluacion`) REFERENCES `evaluacion` (`id_evaluacion`);
+
+--
+-- Filtros para la tabla `progreso`
+--
+ALTER TABLE `progreso`
+  ADD CONSTRAINT `progreso_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `miembro` (`id_usuario`),
+  ADD CONSTRAINT `progreso_ibfk_2` FOREIGN KEY (`id_modulo`) REFERENCES `modulo` (`id_modulo`);
+
+--
+-- Filtros para la tabla `resultado`
+--
+ALTER TABLE `resultado`
+  ADD CONSTRAINT `resultado_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `miembro` (`id_usuario`),
+  ADD CONSTRAINT `resultado_ibfk_2` FOREIGN KEY (`id_evaluacion`) REFERENCES `evaluacion` (`id_evaluacion`);
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

@@ -2,6 +2,7 @@
 import { Link } from "react-router-dom";
 import "../../assets/CSS/dashboard_styles.css";
 
+
 export default function Dashboard() {
   const user = JSON.parse(localStorage.getItem("user"));
 
